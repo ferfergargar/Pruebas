@@ -1,0 +1,47 @@
+import streamlit as st
+import matplotlib.pyplot as plt
+# Importa tus funciones: generate_combinations, compute_revenue_for_combo, etc.
+
+st.title("Optimización de Ingresos para Eventos")
+
+target_revenue = st.number_input("Objetivo de ingreso taquilla", value=100000.0)
+num_sections = st.number_input("Número de secciones", min_value=1, value=2, step=1)
+
+sections = []
+for i in range(num_sections):
+    st.subheader(f"Sección {i+1}")
+    name = st.text_input(f"Nombre de la Sección {i+1}", value=f"Sección {i+1}")
+    seats = st.number_input(f"Asientos de {name}", min_value=1, value=100, step=1)
+    sections.append({'name': name, 'seats': seats})
+
+global_min = st.number_input("Precio mínimo global", value=10.0)
+global_max = st.number_input("Precio máximo global", value=100.0)
+scenario = st.selectbox("Escenario de Demanda", options=["alta", "moderada", "baja"])
+
+if st.button("Calcular"):
+    combos = generate_combinations(sections, scenario, global_min, global_max)
+    scenario_results = []
+    for combo in combos:
+        revenue, details, total_sold = compute_revenue_for_combo(combo, sections)
+        diff = revenue - target_revenue
+        scenario_results.append({
+            'combo': combo,
+            'total_revenue': revenue,
+            'difference': diff,
+            'details': details,
+            'total_sold': total_sold
+        })
+    sorted_results = sorted(scenario_results, key=lambda x: abs(x['difference']))
+    top_results = sorted_results[:10]
+    
+    st.write("### Top 10 Combinaciones")
+    for res in top_results:
+        st.write(res)
+    
+    # Ejemplo de gráfico
+    fig, ax = plt.subplots()
+    section_labels = [sec['name'] for sec in sections]
+    for res in top_results:
+        ax.plot(section_labels, list(res['combo']), marker='o')
+    ax.set_title("Niveles de Precio")
+    st.pyplot(fig)
