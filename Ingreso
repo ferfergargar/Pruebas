@@ -45,3 +45,5 @@ if st.button("Calcular"):
         ax.plot(section_labels, list(res['combo']), marker='o')
     ax.set_title("Niveles de Precio")
     st.pyplot(fig)
+streamlit run app.py
+
